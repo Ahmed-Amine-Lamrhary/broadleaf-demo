@@ -42,9 +42,21 @@
             <groupId>org.broadleafcommerce</groupId>
             <artifactId>broadleaf-sample-payment-gateway</artifactId>
         </dependency>
-        <dependency>
+        <!-- <dependency>
             <groupId>com.broadleafcommerce</groupId>
             <artifactId>broadleaf-boot-starter-hsql-database</artifactId>
+        </dependency> -->
+
+        <dependency>
+            <groupId>com.broadleafcommerce</groupId>
+            <artifactId>broadleaf-boot-starter-database</artifactId>
+            <version>2.3.2-GA</version>
+        </dependency>
+
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.35</version>
         </dependency>
     </dependencies>
 </project>

@@ -25,6 +25,8 @@ import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.common.web.BroadleafRequestContext;
 import org.broadleafcommerce.core.order.domain.Order;
+import org.broadleafcommerce.core.order.service.OrderService;
+import org.broadleafcommerce.core.order.service.exception.IllegalCartOperationException;
 import org.broadleafcommerce.core.payment.domain.OrderPayment;
 import org.broadleafcommerce.core.payment.domain.PaymentTransaction;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
@@ -63,6 +65,9 @@ public class CheckoutController extends BroadleafCheckoutController {
     public static final String REDIRECT_CHECKOUT_LOGIN = "redirect:/checkout/login";
     public static final String GUEST_CHECKOUT = "guest-checkout";
 
+    @Resource(name = "ourOrderServiceImpl")
+    private OrderService orderService;
+
     @Resource(name = "blCheckoutFormService")
     protected CheckoutFormService checkoutFormService;
 
@@ -78,13 +83,30 @@ public class CheckoutController extends BroadleafCheckoutController {
             return REDIRECT_CHECKOUT_LOGIN;
         }
 
-        String checkoutView = super.checkout(request, response, model, redirectAttributes);
+        String checkoutView = this.checkout(request, response, model, redirectAttributes);
         model.addAttribute(ACTIVE_STAGE, getActiveCheckoutStage(request));
 
         checkoutFormService.prePopulateInfoForms(shippingInfoForm, paymentInfoForm);
         checkoutFormService.determineIfSavedAddressIsSelected(model, shippingInfoForm, paymentInfoForm);
 
         return checkoutView;
+    }
+
+    @Override
+    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model,
+            RedirectAttributes redirectAttributes) {
+        return super.checkout(request, response, model, redirectAttributes);
+    }
+
+    @Override
+    protected void preValidateCartOperation(Model model) {
+        try {
+         Order cart = CartState.getCart();
+
+         this.orderService.preValidateCartOperation(cart);
+      } catch (IllegalCartOperationException var3) {
+         model.addAttribute("cartRequiresLock", true);
+      }
     }
 
     protected boolean shouldRedirectToCheckoutLogin(HttpServletRequest request) {
